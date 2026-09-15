@@ -131,7 +131,7 @@ export const years: BudgetYear[] = [
     status: "prorroga",
     decreeName: "Decreto 88/2023",
     decreeUrl: "https://www.argentina.gob.ar/normativa/nacional/decreto-88-2023-395699",
-    why: "El Congreso no sancionó un Presupuesto 2024. El Ejecutivo prorrogo el de 2023. No hay ley de leyes propia. No hay supuestos oficiales de un presupuesto 2024 para comparar contra el INDEC.",
+    why: "El Congreso no sancionó un Presupuesto 2024. El Ejecutivo prorrogó el de 2023. No hay ley de leyes propia. No hay supuestos oficiales de un presupuesto 2024 para comparar contra el INDEC.",
     sources: [
       {
         label: "Decreto 88/2023",
