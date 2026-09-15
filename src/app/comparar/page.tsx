@@ -8,6 +8,7 @@ import {
   year2027,
   type SourcedNumber,
 } from "@/data";
+import { parseCompararState } from "@/lib/comparar-url";
 import { formatSourced } from "@/lib/format";
 
 export const metadata = {
@@ -15,7 +16,13 @@ export const metadata = {
   description: SITE.dek,
 };
 
-export default function CompararPage() {
+export default async function CompararPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ unidad?: string; anios?: string }>;
+}) {
+  const { unit, visible } = parseCompararState(await searchParams);
+
   return (
     <div className="flex flex-col gap-10 xl:gap-14">
       <ProrrogaBanner />
@@ -36,7 +43,12 @@ export default function CompararPage() {
         </p>
       </header>
 
-      <CompareDashboard years={compareYears} factor={priceFactor} />
+      <CompareDashboard
+        years={compareYears}
+        factor={priceFactor}
+        unit={unit}
+        visible={visible}
+      />
 
       <section className="flex flex-col gap-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">

@@ -1,10 +1,7 @@
-"use client";
-
-import { useMemo, useState } from "react";
+import Link from "next/link";
 import { ConfidenceBadge } from "@/components/confidence-badge";
 import { Footnote } from "@/components/footnote";
 import {
-  COMPARE_YEAR_IDS,
   compareFinalidades,
   displayTotal,
   rankByDelta,
@@ -13,12 +10,15 @@ import {
   type SourcedNumber,
   type Unit,
 } from "@/data";
+import { compararHref, toggleYearSelection } from "@/lib/comparar-url";
 import { formatSourced, yearShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type Props = {
   years: CompareYear[];
   factor: SourcedNumber;
+  unit: Unit;
+  visible: CompareYearId[];
 };
 
 const YEAR_TONE: Record<CompareYearId, string> = {
@@ -27,41 +27,23 @@ const YEAR_TONE: Record<CompareYearId, string> = {
   2027: "bg-primary",
 };
 
-export function CompareDashboard({ years, factor }: Props) {
-  const [unit, setUnit] = useState<Unit>("nominal");
-  const [visible, setVisible] = useState<CompareYearId[]>([...COMPARE_YEAR_IDS]);
-
-  const ranked = useMemo(
-    () => rankByDelta(compareFinalidades(years, factor, unit, visible)),
-    [years, factor, unit, visible],
-  );
-
+export function CompareDashboard({ years, factor, unit, visible }: Props) {
+  const ranked = rankByDelta(compareFinalidades(years, factor, unit, visible));
   const maxBar = Math.max(
     ...ranked.flatMap((row) =>
       visible.map((year) => Math.abs(row.amounts[year].value ?? 0)),
     ),
     1,
   );
-
-  function toggleYear(year: CompareYearId) {
-    setVisible((current) => {
-      if (current.includes(year)) {
-        if (current.length === 1) return current;
-        return current.filter((item) => item !== year);
-      }
-      return [...COMPARE_YEAR_IDS].filter(
-        (item) => item === year || current.includes(item),
-      );
-    });
-  }
+  const shownYears = years.filter((year) => visible.includes(year.year));
 
   return (
     <div className="flex flex-col gap-10 xl:gap-12">
-      <KpiStrip years={years} factor={factor} unit={unit} />
+      <KpiStrip years={shownYears} factor={factor} unit={unit} />
 
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <YearChips selected={visible} onToggle={toggleYear} years={years} />
-        <UnitToggle unit={unit} onChange={setUnit} />
+        <YearChips selected={visible} unit={unit} years={years} />
+        <UnitToggle unit={unit} visible={visible} />
       </div>
 
       <p className="text-sm leading-relaxed text-muted-foreground">
@@ -179,7 +161,10 @@ function KpiStrip({
   unit: Unit;
 }) {
   return (
-    <section aria-label="Indicadores" className="grid gap-3 sm:grid-cols-3">
+    <section
+      aria-label="Indicadores"
+      className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
+    >
       {years.map((year) => {
         const total = displayTotal(year, unit, factor);
         return (
@@ -230,11 +215,11 @@ function KpiStrip({
 
 function YearChips({
   selected,
-  onToggle,
+  unit,
   years,
 }: {
   selected: CompareYearId[];
-  onToggle: (year: CompareYearId) => void;
+  unit: Unit;
   years: CompareYear[];
 }) {
   return (
@@ -243,14 +228,15 @@ function YearChips({
       <div className="flex flex-wrap gap-2" role="group" aria-label="Años">
         {years.map((year) => {
           const on = selected.includes(year.year);
+          const next = toggleYearSelection(selected, year.year);
           return (
-            <button
+            <Link
               key={year.year}
-              type="button"
+              href={compararHref(unit, next)}
               aria-pressed={on}
-              onClick={() => onToggle(year.year)}
+              scroll={false}
               className={cn(
-                "tap min-w-11 rounded-full px-4 text-sm",
+                "tap min-w-11 justify-center rounded-full px-4 text-sm",
                 on
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground",
@@ -258,7 +244,7 @@ function YearChips({
             >
               {yearShort(year.year)}
               <span className="sr-only"> {year.year}</span>
-            </button>
+            </Link>
           );
         })}
       </div>
@@ -268,10 +254,10 @@ function YearChips({
 
 function UnitToggle({
   unit,
-  onChange,
+  visible,
 }: {
   unit: Unit;
-  onChange: (unit: Unit) => void;
+  visible: CompareYearId[];
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -282,21 +268,21 @@ function UnitToggle({
         className="grid grid-cols-2 rounded-full bg-muted p-1"
       >
         {(["nominal", "real"] as const).map((value) => (
-          <button
+          <Link
             key={value}
-            type="button"
+            href={compararHref(value, visible)}
             role="radio"
             aria-checked={unit === value}
-            onClick={() => onChange(value)}
+            scroll={false}
             className={cn(
-              "tap min-w-11 justify-center rounded-full px-4 text-sm capitalize",
+              "tap min-w-11 justify-center rounded-full px-4 text-sm",
               unit === value
                 ? "bg-background text-foreground"
                 : "text-muted-foreground",
             )}
           >
             {value === "nominal" ? "Nominal" : "Real"}
-          </button>
+          </Link>
         ))}
       </div>
     </div>
