@@ -1,15 +1,30 @@
-import type { Confidence, SourcedNumber } from "@/data/types";
+import type { CompareStatus, Confidence, ForecastKind, SourcedNumber } from "@/data/types";
 
-const ars = new Intl.NumberFormat("es-AR", { notation: "compact", compactDisplay: "short", maximumFractionDigits: 1 });
-const num = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1, minimumFractionDigits: 0 });
+const ars = new Intl.NumberFormat("es-AR", {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: 1,
+});
+const num = new Intl.NumberFormat("es-AR", {
+  maximumFractionDigits: 1,
+  minimumFractionDigits: 0,
+});
 const signed = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 1,
   minimumFractionDigits: 0,
   signDisplay: "exceptZero",
 });
+const billones = new Intl.NumberFormat("es-AR", {
+  maximumFractionDigits: 1,
+  minimumFractionDigits: 1,
+});
 
 export function formatArs(value: number): string {
   return `$ ${ars.format(value)}`;
+}
+
+export function formatBillones(value: number): string {
+  return `$ ${billones.format(value / 1e12)} billones`;
 }
 
 export function formatPct(value: number, withSign = false): string {
@@ -22,10 +37,11 @@ export function formatPp(value: number): string {
 
 export function formatSourced(
   metric: SourcedNumber,
-  kind: "pct" | "pp" | "ars",
+  kind: "pct" | "pp" | "ars" | "billones",
 ): string {
   if (metric.value === null) return "Dato pendiente";
   if (kind === "ars") return formatArs(metric.value);
+  if (kind === "billones") return formatBillones(metric.value);
   if (kind === "pp") return formatPp(metric.value);
   return formatPct(metric.value, true);
 }
@@ -37,8 +53,16 @@ export function confidenceLabel(confidence: Confidence): string {
   return "Pendiente";
 }
 
-export function statusLabel(status: "aprobado" | "prorroga" | "pendiente"): string {
-  if (status === "aprobado") return "Aprobado";
-  if (status === "prorroga") return "Prórroga";
-  return "Próximamente";
+export function statusLabel(status: CompareStatus): string {
+  if (status === "ley") return "Ley";
+  return "Proyecto PE";
+}
+
+export function forecastKindLabel(kind: ForecastKind): string {
+  if (kind === "ley") return "Ley / mensaje";
+  return "Proyecto no sancionado";
+}
+
+export function yearShort(year: number): string {
+  return String(year).slice(2);
 }

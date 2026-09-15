@@ -43,7 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <SiteHeader />
-        <main className="shell flex-1 py-8 sm:py-12">
+        <main className="shell flex-1 py-8 sm:py-12 xl:py-16">
           {children}
         </main>
         <SiteFooter />

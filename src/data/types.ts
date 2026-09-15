@@ -1,6 +1,10 @@
 export type Confidence = "alta" | "media" | "baja" | "pendiente";
 
+export type LineId = "admin" | "defensa" | "sociales" | "economicos" | "deuda";
+
 export type Taxonomy = "finalidad";
+
+export type CompareYearId = 2023 | 2026 | 2027;
 
 export type SourcedNumber = {
   value: number | null;
@@ -15,7 +19,7 @@ export type MacroPair = {
 };
 
 export type LineItem = {
-  id: string;
+  id: LineId;
   label: string;
   taxonomy: Taxonomy;
   amountArs: SourcedNumber;
@@ -26,51 +30,59 @@ export type SourceLink = {
   url: string;
 };
 
-type BudgetBase = {
-  year: number;
+export type CompareStatus = "ley" | "proyecto";
+
+export type CompareYear = {
+  year: CompareYearId;
+  status: CompareStatus;
+  instrument: string;
+  instrumentUrl: string;
+  government: string;
+  chip: string;
+  statusNote: string;
+  macrosProjected: MacroPair;
+  lineItems: LineItem[];
+  totalArs: SourcedNumber;
+  extras?: {
+    rfSpn?: SourcedNumber;
+    recursosApn?: SourcedNumber;
+    gastosApn?: SourcedNumber;
+  };
   sources: SourceLink[];
 };
 
-export type ApprovedBudget = BudgetBase & {
-  status: "aprobado";
-  lawName: string;
-  lawUrl: string;
-  government: string;
+export type ForecastKind = "ley" | "proyecto-no-sancionado";
+
+export type ForecastYear = {
+  year: number;
+  kind: ForecastKind;
+  instrument: string;
+  note?: string;
   macrosProjected: MacroPair;
   macrosActual: MacroPair;
-  lineItems: LineItem[];
+  sources: SourceLink[];
 };
 
-export type ProrrogaBudget = BudgetBase & {
-  status: "prorroga";
+export type ProrrogaYear = {
+  year: 2024 | 2025;
   decreeName: string;
   decreeUrl: string;
   why: string;
 };
 
-export type PendingBudget = BudgetBase & {
-  status: "pendiente";
-  why: string;
-  macrosProjected: MacroPair;
-  macrosActual: MacroPair;
-  lineItems: LineItem[];
-};
-
-export type BudgetYear = ApprovedBudget | ProrrogaBudget | PendingBudget;
-
 export type LineDelta = {
-  id: string;
+  id: LineId;
   label: string;
   taxonomy: Taxonomy;
-  amountA: SourcedNumber;
-  amountB: SourcedNumber;
-  pctNominal: SourcedNumber;
-  pctReal: SourcedNumber;
-  source: string;
+  amounts: Record<CompareYearId, SourcedNumber>;
+  deltaPct: SourcedNumber;
 };
 
 export type ForecastMiss = {
   year: number;
+  kind: ForecastKind;
+  instrument: string;
+  note?: string;
   inflationErrorPp: SourcedNumber;
   growthErrorPp: SourcedNumber;
 };
@@ -80,14 +92,12 @@ export type IpcYear = {
   ipcYoY: SourcedNumber;
 };
 
-export function isApproved(year: BudgetYear): year is ApprovedBudget {
-  return year.status === "aprobado";
+export type Unit = "nominal" | "real";
+
+export function isLey(year: CompareYear): boolean {
+  return year.status === "ley";
 }
 
-export function isPending(year: BudgetYear): year is PendingBudget {
-  return year.status === "pendiente";
-}
-
-export function isProrroga(year: BudgetYear): year is ProrrogaBudget {
-  return year.status === "prorroga";
+export function isProyecto(year: CompareYear): boolean {
+  return year.status === "proyecto";
 }

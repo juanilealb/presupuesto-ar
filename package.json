@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --port 43127",
     "lint": "eslint",
-    "check-data": "node --experimental-strip-types --no-warnings scripts/check-data.ts"
+    "check-data": "tsx scripts/check-data.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -28,6 +28,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }
