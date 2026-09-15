@@ -1,12 +1,25 @@
-import { ipcForDeflator, year2023, year2026 } from "@/data";
+import {
+  DEFLATOR_NOTE,
+  compareYears,
+  forecastYears,
+  ipcForDeflator,
+  prorrogaSources,
+  prorrogaYears,
+} from "@/data";
 
 export const metadata = {
   title: "Fuentes",
-  description: "De dónde sale cada número y cómo se deflacta 2023–2026.",
+  description: "De dónde sale cada número y cómo se deflacta.",
 };
 
 export default function FuentesPage() {
-  const links = [...year2023.sources, ...year2026.sources];
+  const links = [
+    ...compareYears.flatMap((row) => row.sources),
+    ...forecastYears.flatMap((row) => row.sources),
+    ...prorrogaSources,
+  ].filter(
+    (item, index, all) => all.findIndex((other) => other.url === item.url) === index,
+  );
 
   return (
     <article className="flex max-w-3xl flex-col gap-10">
@@ -15,11 +28,11 @@ export default function FuentesPage() {
           Fuentes
         </h1>
         <p className="text-lg leading-relaxed text-muted-foreground">
-          Cada cifra del sitio tiene un `source` y una `confidence` en{" "}
+          Cada cifra tiene `source` y `confidence` en{" "}
           <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">
-            src/data/years.ts
+            src/data
           </code>
-          . Si no está en la ley o en el INDEC, dice dato pendiente.
+          . Si no está en la ley, el mensaje o el INDEC, dice dato pendiente.
         </p>
       </header>
 
@@ -27,30 +40,32 @@ export default function FuentesPage() {
         <h2 className="font-heading text-2xl tracking-tight">Reglas</h2>
         <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-muted-foreground">
           <li>
-            Totales y finalidades. Artículos 1 de las leyes 27.701 y 27.798.
+            Comparar usa solo 2023 (Ley 27.701), 2026 (Ley 27.798) y 2027
+            (proyecto PE). No hay serie 2024/2025 inventada.
           </li>
           <li>
-            Supuestos de inflación y PIB. Mensaje o proyecto de cada presupuesto.
-            Confianza media hasta contrastar el PDF.
+            Totales y finalidades: artículo 1 de cada instrumento.
           </li>
           <li>
-            Observado. INDEC, IPC dic-dic y PIB anual. 2026 sigue pendiente
-            porque el año no cerró.
+            Macros: mensaje del proyecto. 2027 usa §2.3 (IPC 18,0%, PIB +4,0%).
+            No se usan cifras de prensa.
           </li>
           <li>
-            Deflactor. Producto de IPC 2023 (211,4%), 2024 (117,8%) y 2025
-            (31,5%). Convierte pesos 2023 a precios de diciembre de 2025.
+            Pronóstico: error = observado INDEC − supuesto. 2024 y 2025 son
+            proyectos no sancionados, bajo prórroga.
           </li>
           <li>
-            2024 y 2025 son prórroga. No hay ley propia. No hay fila de error.
+            2026 observado: pendiente. El año no cerró.
           </li>
+          <li>2027: proyectado PE / pendiente de sanción. No es ley.</li>
         </ul>
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-heading text-2xl tracking-tight">
-          Serie del deflactor
-        </h2>
+        <h2 className="font-heading text-2xl tracking-tight">Deflactor</h2>
+        <p className="text-base leading-relaxed text-muted-foreground">
+          {DEFLATOR_NOTE}
+        </p>
         <ul className="space-y-2 text-base text-muted-foreground">
           {ipcForDeflator.map((row) => (
             <li key={row.year}>
@@ -61,22 +76,14 @@ export default function FuentesPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-heading text-2xl tracking-tight">
-          Cómo cargar 2027
-        </h2>
-        <p className="text-base leading-relaxed text-muted-foreground">
-          Editá el objeto 2027 en{" "}
-          <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">
-            src/data/years.ts
-          </code>
-          . Cambiá el status a aprobado cuando haya ley. Completá
-          macrosProjected, macrosActual y lineItems con value, source y
-          confidence. El home toma el par 2023–2026 desde{" "}
-          <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">
-            PAIR
-          </code>{" "}
-          en src/data/index.ts.
-        </p>
+        <h2 className="font-heading text-2xl tracking-tight">Prórroga</h2>
+        <ul className="space-y-2 text-base text-muted-foreground">
+          {prorrogaYears.map((row) => (
+            <li key={row.year}>
+              {row.year}. {row.decreeName}. {row.why}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="flex flex-col gap-3">

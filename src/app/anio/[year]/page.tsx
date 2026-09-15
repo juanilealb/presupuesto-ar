@@ -1,30 +1,9 @@
-import { notFound } from "next/navigation";
-import { YearBody } from "@/components/year-body";
-import { getYear, years } from "@/data";
+import { notFound, redirect } from "next/navigation";
 
 type YearParams = { year: string };
 
 export function generateStaticParams() {
-  return years.map((row) => ({ year: String(row.year) }));
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<YearParams>;
-}) {
-  const { year } = await params;
-  const row = getYear(Number(year));
-  if (!row) return { title: "Año no encontrado" };
-  return {
-    title: `${row.year}`,
-    description:
-      row.status === "aprobado"
-        ? `Proyectado vs observado en ${row.year}.`
-        : row.status === "prorroga"
-          ? `Sin ley de presupuesto en ${row.year}.`
-          : `Ficha vacía ${row.year}.`,
-  };
+  return ["2023", "2024", "2025", "2026", "2027"].map((year) => ({ year }));
 }
 
 export default async function YearPage({
@@ -33,7 +12,8 @@ export default async function YearPage({
   params: Promise<YearParams>;
 }) {
   const { year } = await params;
-  const row = getYear(Number(year));
-  if (!row) notFound();
-  return <YearBody year={row} />;
+  const n = Number(year);
+  if (n === 2024 || n === 2025) redirect("/pronostico");
+  if (n === 2023 || n === 2026 || n === 2027) redirect("/comparar");
+  notFound();
 }

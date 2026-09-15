@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="flex flex-col items-start gap-4 py-16">
       <h1 className="font-heading text-4xl tracking-tight">Esa página no está</h1>
       <p className="max-w-md text-muted-foreground">
-        Probá el home, un año cargado (2023–2027) o la comparación.
+        Probá Comparar, Pronóstico o Fuentes.
       </p>
       <Button render={<Link href="/" />} size="lg">
         Volver al inicio
